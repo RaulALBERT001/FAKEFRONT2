@@ -84,9 +84,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { username, password } = loginSchema.parse(req.body);
       
-      const user = await storage.getUserByUsername(username);
+      // Para demonstração, aceitar qualquer login válido
+      // Se usuário não existe, criar automaticamente
+      let user = await storage.getUserByUsername(username);
       if (!user) {
-        return res.status(401).json({ message: "Invalid credentials" });
+        user = await storage.createUser({
+          username: username,
+          email: `${username}@demo.com`,
+          password: password
+        });
       }
 
       const token = jwt.sign({ userId: user.id, username: user.username }, JWT_SECRET, { expiresIn: '24h' });
@@ -97,67 +103,70 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Challenge routes (authentication required)
-  app.get("/api/desafios", authenticateToken, (req: AuthRequest, res: Response) => {
-    res.json(mockChallenges);
-  });
-
-  app.get("/api/desafios/:id", authenticateToken, (req: AuthRequest, res: Response) => {
-    const id = parseInt(req.params.id);
-    const challenge = mockChallenges.find(c => c.id === id);
-    
-    if (!challenge) {
-      return res.status(404).json({ message: "Challenge not found" });
+  app.get("/api/desafios", authenticateToken, async (req: AuthRequest, res: Response) => {
+    try {
+      const challenges = await storage.getChallenges();
+      res.json(challenges);
+    } catch (error) {
+      res.status(500).json({ message: "Error fetching challenges" });
     }
-    
-    res.json(challenge);
   });
 
-  app.post("/api/desafios", authenticateToken, (req: AuthRequest, res: Response) => {
+  app.get("/api/desafios/:id", authenticateToken, async (req: AuthRequest, res: Response) => {
+    try {
+      const id = parseInt(req.params.id);
+      const challenge = await storage.getChallenge(id);
+      
+      if (!challenge) {
+        return res.status(404).json({ message: "Challenge not found" });
+      }
+      
+      res.json(challenge);
+    } catch (error) {
+      res.status(500).json({ message: "Error fetching challenge" });
+    }
+  });
+
+  app.post("/api/desafios", authenticateToken, async (req: AuthRequest, res: Response) => {
     try {
       const challengeData = challengeSchema.parse(req.body);
       
-      const newChallenge: Challenge = {
-        id: challengeIdCounter++,
+      const challengeToCreate = {
         titulo: challengeData.titulo,
         descricao: challengeData.descricao || "",
         nivelDificuldade: challengeData.nivelDificuldade || "",
         categoria: challengeData.categoria || "",
         pontuacaoMaxima: challengeData.pontuacaoMaxima || 0,
         tempoEstimado: challengeData.tempoEstimado || 0,
-        statusAtivo: true,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
+        statusAtivo: true
       };
       
-      mockChallenges.push(newChallenge);
+      const newChallenge = await storage.createChallenge(challengeToCreate);
       res.status(201).json(newChallenge);
     } catch (error) {
       res.status(400).json({ message: "Invalid data" });
     }
   });
 
-  app.put("/api/desafios/:id", authenticateToken, (req: AuthRequest, res: Response) => {
+  app.put("/api/desafios/:id", authenticateToken, async (req: AuthRequest, res: Response) => {
     try {
       const id = parseInt(req.params.id);
       const challengeData = challengeSchema.parse(req.body);
       
-      const challengeIndex = mockChallenges.findIndex(c => c.id === id);
-      if (challengeIndex === -1) {
+      const updateData = {
+        titulo: challengeData.titulo,
+        descricao: challengeData.descricao,
+        nivelDificuldade: challengeData.nivelDificuldade,
+        categoria: challengeData.categoria,
+        pontuacaoMaxima: challengeData.pontuacaoMaxima,
+        tempoEstimado: challengeData.tempoEstimado
+      };
+      
+      const updatedChallenge = await storage.updateChallenge(id, updateData);
+      if (!updatedChallenge) {
         return res.status(404).json({ message: "Challenge not found" });
       }
       
-      const updatedChallenge: Challenge = {
-        ...mockChallenges[challengeIndex],
-        titulo: challengeData.titulo,
-        descricao: challengeData.descricao || mockChallenges[challengeIndex].descricao,
-        nivelDificuldade: challengeData.nivelDificuldade || mockChallenges[challengeIndex].nivelDificuldade,
-        categoria: challengeData.categoria || mockChallenges[challengeIndex].categoria,
-        pontuacaoMaxima: challengeData.pontuacaoMaxima || mockChallenges[challengeIndex].pontuacaoMaxima,
-        tempoEstimado: challengeData.tempoEstimado || mockChallenges[challengeIndex].tempoEstimado,
-        updatedAt: new Date().toISOString(),
-      };
-      
-      mockChallenges[challengeIndex] = updatedChallenge;
       res.json(updatedChallenge);
     } catch (error) {
       res.status(400).json({ message: "Invalid data" });
