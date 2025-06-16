@@ -1,4 +1,4 @@
-import { Edit, Trash2, Droplets, Zap, Bus, Recycle, Utensils, ShoppingCart } from "lucide-react";
+import { Edit, Trash2, Droplets, Zap, Bus, Recycle, Utensils, ShoppingCart, HelpCircle } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -41,7 +41,12 @@ const categoryLabels = {
 };
 
 export function ChallengeCard({ challenge, onEdit, onDelete }: ChallengeCardProps) {
-  const categoryConfig = categoryIcons[challenge.categoria];
+  const categoryConfig = categoryIcons[challenge.categoria] || {
+    icon: HelpCircle,
+    color: "text-gray-500",
+    bg: "bg-gray-100"
+  };
+  
   const CategoryIcon = categoryConfig.icon;
 
   return (
@@ -54,7 +59,7 @@ export function ChallengeCard({ challenge, onEdit, onDelete }: ChallengeCardProp
             </div>
             <div className="ml-3">
               <Badge variant="secondary" className={categoryConfig.bg}>
-                {categoryLabels[challenge.categoria]}
+                {categoryLabels[challenge.categoria] || challenge.categoria}
               </Badge>
             </div>
           </div>
