@@ -8,6 +8,8 @@ interface ChallengeCardProps {
   challenge: Challenge;
   onEdit: (challenge: Challenge) => void;
   onDelete: (challenge: Challenge) => void;
+  onComplete?: (challenge: Challenge) => void;
+  isCompleted?: boolean;
 }
 
 const categoryIcons: Record<string, { icon: any; color: string; bg: string }> = {
