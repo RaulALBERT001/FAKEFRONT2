@@ -160,6 +160,98 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Quiz routes
+  app.get("/api/quiz/random", authenticateToken, async (req: AuthRequest, res: Response) => {
+    try {
+      const quiz = await storage.getRandomQuiz();
+      res.json(quiz);
+    } catch (error) {
+      res.status(500).json({ message: "Error fetching quiz" });
+    }
+  });
+
+  app.post("/api/quiz/submit", authenticateToken, async (req: AuthRequest, res: Response) => {
+    try {
+      const { answers } = req.body;
+      const quiz = await storage.getRandomQuiz();
+      
+      let score = 0;
+      quiz.questions.forEach((question, index) => {
+        if (answers[index] === question.correctAnswer) {
+          score++;
+        }
+      });
+
+      const pointsEarned = score * 100;
+      
+      // Update user points
+      const user = await storage.getUser(req.userId!);
+      if (user) {
+        await storage.updateUser(req.userId!, { 
+          points: user.points + pointsEarned 
+        });
+      }
+
+      res.json({
+        score,
+        totalQuestions: quiz.questions.length,
+        pointsEarned
+      });
+    } catch (error) {
+      res.status(500).json({ message: "Error submitting quiz" });
+    }
+  });
+
+  // Complete challenge
+  app.post("/api/desafios/:id/complete", authenticateToken, async (req: AuthRequest, res: Response) => {
+    try {
+      const challengeId = parseInt(req.params.id);
+      const challenge = await storage.getChallenge(challengeId);
+      const user = await storage.getUser(req.userId!);
+      
+      if (!challenge || !user) {
+        return res.status(404).json({ message: "Challenge or user not found" });
+      }
+
+      if (user.completedChallenges.includes(challengeId)) {
+        return res.status(400).json({ message: "Challenge already completed" });
+      }
+
+      // Update user with completed challenge and points
+      await storage.updateUser(req.userId!, {
+        points: user.points + challenge.pontuacaoMaxima,
+        completedChallenges: [...user.completedChallenges, challengeId]
+      });
+
+      res.json({ 
+        message: "Challenge completed successfully",
+        pointsEarned: challenge.pontuacaoMaxima
+      });
+    } catch (error) {
+      res.status(500).json({ message: "Error completing challenge" });
+    }
+  });
+
+  // Get user profile with points
+  app.get("/api/user/profile", authenticateToken, async (req: AuthRequest, res: Response) => {
+    try {
+      const user = await storage.getUser(req.userId!);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      
+      res.json({
+        id: user.id,
+        username: user.username,
+        email: user.email,
+        points: user.points,
+        completedChallenges: user.completedChallenges.length
+      });
+    } catch (error) {
+      res.status(500).json({ message: "Error fetching user profile" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

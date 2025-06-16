@@ -1,4 +1,4 @@
-import { Edit, Trash2, Droplets, Zap, Bus, Recycle, Utensils, ShoppingCart, HelpCircle } from "lucide-react";
+import { Edit, Trash2, Droplets, Zap, Bus, Recycle, Utensils, ShoppingCart, HelpCircle, CheckCircle } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -25,25 +25,37 @@ const categoryIcons: Record<string, { icon: any; color: string; bg: string }> = 
   "CONSUMO": { icon: ShoppingCart, color: "text-pink-500", bg: "bg-pink-100" },
 };
 
-const difficultyColors = {
-  FACIL: "bg-green-100 text-green-800",
-  MEDIO: "bg-yellow-100 text-yellow-800",
-  DIFICIL: "bg-red-100 text-red-800",
+const difficultyColors: Record<string, string> = {
+  "Fácil": "bg-green-100 text-green-800",
+  "Médio": "bg-yellow-100 text-yellow-800", 
+  "Difícil": "bg-red-100 text-red-800",
+  "FACIL": "bg-green-100 text-green-800",
+  "MEDIO": "bg-yellow-100 text-yellow-800",
+  "DIFICIL": "bg-red-100 text-red-800",
 };
 
-const difficultyLabels = {
-  FACIL: "Fácil",
-  MEDIO: "Médio",
-  DIFICIL: "Difícil",
+const difficultyLabels: Record<string, string> = {
+  "Fácil": "Fácil",
+  "Médio": "Médio",
+  "Difícil": "Difícil",
+  "FACIL": "Fácil",
+  "MEDIO": "Médio", 
+  "DIFICIL": "Difícil",
 };
 
-const categoryLabels = {
-  AGUA: "Água",
-  ENERGIA: "Energia",
-  TRANSPORTE: "Transporte",
-  RESIDUOS: "Resíduos",
-  ALIMENTACAO: "Alimentação",
-  CONSUMO: "Consumo",
+const categoryLabels: Record<string, string> = {
+  "Água": "Água",
+  "Energia": "Energia",
+  "Transporte": "Transporte",
+  "Resíduos": "Resíduos",
+  "Alimentação": "Alimentação",
+  "Consumo": "Consumo",
+  "AGUA": "Água",
+  "ENERGIA": "Energia",
+  "TRANSPORTE": "Transporte",
+  "RESIDUOS": "Resíduos",
+  "ALIMENTACAO": "Alimentação",
+  "CONSUMO": "Consumo",
 };
 
 export function ChallengeCard({ challenge, onEdit, onDelete }: ChallengeCardProps) {
