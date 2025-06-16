@@ -1,4 +1,4 @@
-import { type User, type InsertUser, type Challenge } from "@shared/schema";
+import { type User, type InsertUser, type Challenge, type Quiz, type QuizQuestion } from "@shared/schema";
 
 // modify the interface with any CRUD methods
 // you might need
@@ -7,22 +7,27 @@ export interface IStorage {
   getUser(id: number): Promise<User | undefined>;
   getUserByUsername(username: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
+  updateUser(id: number, updates: Partial<User>): Promise<User | undefined>;
   getChallenges(): Promise<Challenge[]>;
   getChallenge(id: number): Promise<Challenge | undefined>;
   createChallenge(challenge: Omit<Challenge, 'id' | 'createdAt' | 'updatedAt'>): Promise<Challenge>;
   updateChallenge(id: number, challenge: Partial<Omit<Challenge, 'id' | 'createdAt' | 'updatedAt'>>): Promise<Challenge | undefined>;
   deleteChallenge(id: number): Promise<boolean>;
+  getQuizzes(): Promise<Quiz[]>;
+  getRandomQuiz(): Promise<Quiz>;
 }
 
 export class MemStorage implements IStorage {
   private users: Map<number, User>;
   private challenges: Map<number, Challenge>;
+  private quizzes: Quiz[];
   private currentUserId: number;
   private currentChallengeId: number;
 
   constructor() {
     this.users = new Map();
     this.challenges = new Map();
+    this.quizzes = [];
     this.currentUserId = 1;
     this.currentChallengeId = 1;
     
@@ -35,7 +40,9 @@ export class MemStorage implements IStorage {
     const demoUser: User = {
       id: this.currentUserId++,
       username: "demo",
-      email: "demo@exemplo.com"
+      email: "demo@exemplo.com",
+      points: 0,
+      completedChallenges: []
     };
     this.users.set(demoUser.id, demoUser);
 
@@ -119,7 +126,7 @@ export class MemStorage implements IStorage {
 
   async createUser(insertUser: InsertUser): Promise<User> {
     const id = this.currentUserId++;
-    const user: User = { ...insertUser, id };
+    const user: User = { ...insertUser, id, points: 0, completedChallenges: [] };
     this.users.set(id, user);
     return user;
   }

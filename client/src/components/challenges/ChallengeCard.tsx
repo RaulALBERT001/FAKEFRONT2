@@ -10,13 +10,19 @@ interface ChallengeCardProps {
   onDelete: (challenge: Challenge) => void;
 }
 
-const categoryIcons = {
-  AGUA: { icon: Droplets, color: "text-blue-500", bg: "bg-blue-100" },
-  ENERGIA: { icon: Zap, color: "text-yellow-500", bg: "bg-yellow-100" },
-  TRANSPORTE: { icon: Bus, color: "text-green-500", bg: "bg-green-100" },
-  RESIDUOS: { icon: Recycle, color: "text-purple-500", bg: "bg-purple-100" },
-  ALIMENTACAO: { icon: Utensils, color: "text-orange-500", bg: "bg-orange-100" },
-  CONSUMO: { icon: ShoppingCart, color: "text-pink-500", bg: "bg-pink-100" },
+const categoryIcons: Record<string, { icon: any; color: string; bg: string }> = {
+  "Água": { icon: Droplets, color: "text-blue-500", bg: "bg-blue-100" },
+  "Energia": { icon: Zap, color: "text-yellow-500", bg: "bg-yellow-100" },
+  "Transporte": { icon: Bus, color: "text-green-500", bg: "bg-green-100" },
+  "Resíduos": { icon: Recycle, color: "text-purple-500", bg: "bg-purple-100" },
+  "Alimentação": { icon: Utensils, color: "text-orange-500", bg: "bg-orange-100" },
+  "Consumo": { icon: ShoppingCart, color: "text-pink-500", bg: "bg-pink-100" },
+  "AGUA": { icon: Droplets, color: "text-blue-500", bg: "bg-blue-100" },
+  "ENERGIA": { icon: Zap, color: "text-yellow-500", bg: "bg-yellow-100" },
+  "TRANSPORTE": { icon: Bus, color: "text-green-500", bg: "bg-green-100" },
+  "RESIDUOS": { icon: Recycle, color: "text-purple-500", bg: "bg-purple-100" },
+  "ALIMENTACAO": { icon: Utensils, color: "text-orange-500", bg: "bg-orange-100" },
+  "CONSUMO": { icon: ShoppingCart, color: "text-pink-500", bg: "bg-pink-100" },
 };
 
 const difficultyColors = {

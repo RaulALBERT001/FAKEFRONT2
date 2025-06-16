@@ -49,12 +49,33 @@ export interface User {
   id: number;
   username: string;
   email: string;
+  points: number;
+  completedChallenges: number[];
 }
 
 export interface InsertUser {
   username: string;
   email: string;
   password: string;
+}
+
+export interface QuizQuestion {
+  id: number;
+  question: string;
+  options: string[];
+  correctAnswer: number;
+}
+
+export interface Quiz {
+  id: number;
+  title: string;
+  questions: QuizQuestion[];
+}
+
+export interface QuizResult {
+  score: number;
+  totalQuestions: number;
+  pointsEarned: number;
 }
 
 export interface ApiError {
