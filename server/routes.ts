@@ -30,35 +30,7 @@ const authenticateToken = (req: AuthRequest, res: Response, next: NextFunction) 
   });
 };
 
-// Mock challenges data matching the Java API structure
-const mockChallenges: Challenge[] = [
-  {
-    id: 1,
-    titulo: "Reduza o Consumo de Água",
-    descricao: "Diminua o uso de água em casa por uma semana",
-    nivelDificuldade: "FACIL",
-    categoria: "AGUA",
-    pontuacaoMaxima: 100,
-    tempoEstimado: 7,
-    statusAtivo: true,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  },
-  {
-    id: 2,
-    titulo: "Use Transporte Público",
-    descricao: "Utilize apenas transporte público por 5 dias",
-    nivelDificuldade: "MEDIO",
-    categoria: "TRANSPORTE",
-    pontuacaoMaxima: 200,
-    tempoEstimado: 5,
-    statusAtivo: true,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  },
-];
 
-let challengeIdCounter = 3;
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Auth routes (no authentication required)
@@ -173,16 +145,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete("/api/desafios/:id", authenticateToken, (req: AuthRequest, res: Response) => {
-    const id = parseInt(req.params.id);
-    const challengeIndex = mockChallenges.findIndex(c => c.id === id);
-    
-    if (challengeIndex === -1) {
-      return res.status(404).json({ message: "Challenge not found" });
+  app.delete("/api/desafios/:id", authenticateToken, async (req: AuthRequest, res: Response) => {
+    try {
+      const id = parseInt(req.params.id);
+      const deleted = await storage.deleteChallenge(id);
+      
+      if (!deleted) {
+        return res.status(404).json({ message: "Challenge not found" });
+      }
+      
+      res.status(204).send();
+    } catch (error) {
+      res.status(500).json({ message: "Error deleting challenge" });
     }
-    
-    mockChallenges.splice(challengeIndex, 1);
-    res.status(204).send();
   });
 
   const httpServer = createServer(app);
